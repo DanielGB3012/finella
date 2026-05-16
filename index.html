@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finella — Tu Plataforma Financiera</title>
+<link href="https://fonts.googleapis.com/css2?family=Merienda:wght@300..900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lavender: #822BAE;
+    --lavender-light: #D7AEEB;
+    --lavender-deep: #9D3BCE;
+    --coral: #f4a896;
+    --coral-light: #fde8e4;
+    --coral-deep: #e07a64;
+    --white: #fffcfa;
+    --gray-soft: #f7f4f1;
+    --gray-mid: #d4cfc9;
+    --gray-dark: #5a5260;
+    --ink: #2d2535;
+    --success: #7ec8a4;
+    --sidebar-w: 220px;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(90,82,96,0.10);
+    --shadow-hover: 0 8px 32px rgba(90,82,96,0.18);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gray-soft);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--white);
+    border-right: 1px solid var(--lavender-light);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: transform .3s ease;
+    padding-bottom: 24px;
+  }
+  .logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--lavender-light);
+  }
+  .logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    color: var(--lavender-deep);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--coral-deep); }
+  .logo p { font-size: .72rem; color: var(--gray-dark); margin-top: 2px; letter-spacing: .5px; text-transform: uppercase; }
+
+  nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--gray-dark);
+    transition: all .2s ease;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--lavender-light); color: var(--lavender-deep); }
+  .nav-item.active { background: linear-gradient(135deg, var(--lavender) 0%, var(--lavender-deep) 100%); color: white; }
+  .nav-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+
+  .sidebar-footer { padding: 16px 24px; }
+  .avatar-row { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--coral-light), var(--lavender-light)); display: grid; place-items: center; font-size: 1rem; }
+  .avatar-info p { font-size: .8rem; font-weight: 600; color: var(--ink); }
+  .avatar-info span { font-size: .7rem; color: var(--gray-dark); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 36px;
+    min-height: 100vh;
+  }
+
+  .page { display: none; animation: fadeUp .35s ease; }
+  .page.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+  .page-header { margin-bottom: 28px; }
+  .page-header h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--ink); }
+  .page-header p { color: var(--gray-dark); font-size: .875rem; margin-top: 4px; }
+
+  /* ── DASHBOARD ── */
+  .welcome-banner {
+    background: linear-gradient(135deg, var(--lavender-deep) 0%, #EBAEE1 60%, var(--coral-deep) 130%);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    color: white;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+    position: relative; overflow: hidden;
+  }
+  .welcome-banner::before {
+    content: '✦';
+    position: absolute; right: 120px; top: -10px;
+    font-size: 5rem; opacity: .08;
+  }
+  .welcome-banner::after {
+    content: '◇';
+    position: absolute; right: 30px; bottom: -14px;
+    font-size: 7rem; opacity: .06;
+  }
+  .welcome-text h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 400; }
+  .welcome-text h3 em { font-style: italic; }
+  .welcome-text p { font-size: .85rem; opacity: .85; margin-top: 6px; }
+  .welcome-badge {
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: .78rem;
+    backdrop-filter: blur(6px);
+    white-space: nowrap;
+  }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(184,169,217,.15);
+    transition: box-shadow .2s;
+    position: relative; overflow: hidden;
+  }
+  .stat-card:hover { box-shadow: var(--shadow-hover); }
+  .stat-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat-card.purple::after { background: linear-gradient(90deg, var(--lavender), var(--lavender-deep)); }
+  .stat-card.coral::after { background: linear-gradient(90deg, var(--coral), var(--coral-deep)); }
+  .stat-card.green::after { background: linear-gradient(90deg, #a8dfc0, var(--success)); }
+  .stat-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .6px; color: var(--gray-dark); margin-bottom: 8px; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--ink); }
+  .stat-value sup { font-size: 1rem; vertical-align: super; }
+  .stat-sub { font-size: .75rem; color: var(--success); margin-top: 4px; }
+
+  .recent-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 14px; }
+  .recent-list { display: flex; flex-direction: column; gap: 10px; }
+  .recent-item {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(184,169,217,.12);
+  }
+  .recent-icon { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0; }
+  .recent-info { flex: 1; }
+  .recent-info strong { font-size: .875rem; display: block; }
+  .recent-info span { font-size: .75rem; color: var(--gray-dark); }
+  .recent-amt { font-weight: 600; font-size: .95rem; }
+  .neg { color: var(--coral-deep); }
+  .pos { color: var(--success); }
+
+  /* ── GASTOS ── */
+  .two-col { display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(184,169,217,.15);
+  }
+  .card h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; margin-bottom: 20px; color: var(--ink); }
+
+  label { display: block; font-size: .8rem; font-weight: 600; color: var(--gray-dark); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; }
+  input, select {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--gray-mid);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    color: var(--ink);
+    background: var(--white);
+    transition: border-color .2s;
+    margin-bottom: 16px;
+    outline: none;
+  }
+  input:focus, select:focus { border-color: var(--lavender-deep); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .2s ease;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--lavender-deep), #6e5fa0);
+    color: white;
+    width: 100%;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(139,123,181,.4);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,123,181,.5); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .expense-table { width: 100%; border-collapse: collapse; }
+  .expense-table th {
+    text-align: left; font-size: .72rem; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--gray-dark);
+    padding: 0 14px 12px; border-bottom: 1.5px solid var(--lavender-light);
+  }
+  .expense-table td { padding: 13px 14px; font-size: .875rem; border-bottom: 1px solid var(--lavender-light); }
+  .expense-table tr:last-child td { border-bottom: none; }
+  .expense-table tr:hover td { background: var(--gray-soft); }
+  .cat-pill {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 50px; font-size: .72rem; font-weight: 600;
+  }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-dark); }
+  .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; opacity: .5; }
+
+  /* ── CHAT ── */
+  .chat-wrapper {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(184,169,217,.15);
+    display: flex; flex-direction: column;
+    height: 520px;
+  }
+  .chat-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--lavender-light);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .ai-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--lavender), var(--coral));
+    display: grid; place-items: center; font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .ai-info strong { font-size: .9rem; }
+  .ai-info span { font-size: .72rem; color: var(--success); display: block; }
+  .chat-online { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--success); margin-right: 4px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 20px 24px;
+    display: flex; flex-direction: column; gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--lavender-light); border-radius: 4px; }
+
+  .msg { display: flex; gap: 10px; max-width: 78%; animation: msgIn .25s ease; }
+  @keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-bubble {
+    padding: 11px 15px; border-radius: 16px;
+    font-size: .875rem; line-height: 1.5;
+  }
+  .msg.bot .msg-bubble { background: var(--lavender-light); color: var(--ink); border-bottom-left-radius: 4px; }
+  .msg.user .msg-bubble { background: linear-gradient(135deg, var(--lavender-deep), #6e5fa0); color: white; border-bottom-right-radius: 4px; }
+  .msg-mini-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--lavender), var(--coral)); display: grid; place-items: center; font-size: .75rem; flex-shrink: 0; margin-top: 2px; }
+
+  .chat-input-row {
+    padding: 16px 20px;
+    border-top: 1px solid var(--lavender-light);
+    display: flex; gap: 10px;
+  }
+  .chat-input {
+    flex: 1; padding: 11px 16px;
+    border: 1.5px solid var(--lavender-light);
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    outline: none;
+    transition: border-color .2s;
+    margin-bottom: 0;
+  }
+  .chat-input:focus { border-color: var(--lavender-deep); }
+  .btn-send {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--lavender-deep), #6e5fa0);
+    border: none; cursor: pointer; color: white; font-size: 1rem;
+    display: grid; place-items: center;
+    transition: transform .2s, box-shadow .2s;
+    box-shadow: 0 4px 12px rgba(139,123,181,.35);
+    flex-shrink: 0;
+  }
+  .btn-send:hover { transform: scale(1.08); }
+
+  /* ── RETOS ── */
+  .retos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 20px; }
+  .reto-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(184,169,217,.15);
+    transition: box-shadow .2s, transform .2s;
+  }
+  .reto-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  .reto-emoji { font-size: 2rem; margin-bottom: 12px; }
+  .reto-card h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; margin-bottom: 6px; }
+  .reto-card p { font-size: .8rem; color: var(--gray-dark); margin-bottom: 18px; line-height: 1.5; }
+  .progress-label { display: flex; justify-content: space-between; font-size: .75rem; color: var(--gray-dark); margin-bottom: 6px; }
+  .progress-bar { height: 8px; background: var(--lavender-light); border-radius: 50px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 50px; transition: width 1s ease; }
+  .fill-lavender { background: linear-gradient(90deg, var(--lavender), var(--lavender-deep)); }
+  .fill-coral { background: linear-gradient(90deg, var(--coral), var(--coral-deep)); }
+  .fill-green { background: linear-gradient(90deg, #a8dfc0, var(--success)); }
+
+  /* ── CURSOS ── */
+  .cursos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+  .curso-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 28px 22px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(184,169,217,.15);
+    cursor: pointer;
+    transition: all .25s ease;
+    position: relative; overflow: hidden;
+    text-align: center;
+  }
+  .curso-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--lavender-light) 0%, transparent 60%);
+    opacity: 0; transition: opacity .25s;
+  }
+  .curso-card:hover::before { opacity: 1; }
+  .curso-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+  .curso-icon { font-size: 2rem; margin-bottom: 14px; display: block; }
+  .curso-card h4 { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--ink); margin-bottom: 8px; }
+  .curso-badge {
+    display: inline-block; padding: 4px 12px;
+    background: var(--lavender-light); color: var(--lavender-deep);
+    border-radius: 50px; font-size: .7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .4px;
+  }
+
+  /* ── COMING SOON ── */
+  .coming-soon-wrap { position: relative; }
+  .coming-soon-overlay {
+    position: absolute; inset: 0;
+    background: rgba(255,252,250,.82);
+    backdrop-filter: blur(4px);
+    border-radius: var(--radius);
+    display: grid; place-items: center;
+    z-index: 10;
+  }
+  .cs-badge {
+    background: var(--ink);
+    color: white;
+    padding: 12px 36px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    box-shadow: 0 8px 28px rgba(45,37,53,.3);
+  }
+  .empr-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; pointer-events: none; opacity: .55; }
+  .empr-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(184,169,217,.15);
+  }
+  .empr-card .empr-icon { font-size: 2rem; margin-bottom: 12px; }
+  .empr-card h4 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: 6px; }
+  .empr-card p { font-size: .8rem; color: var(--gray-dark); line-height: 1.5; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--ink); color: white;
+    padding: 14px 22px; border-radius: 12px;
+    font-size: .875rem; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(45,37,53,.3);
+    transform: translateY(20px); opacity: 0;
+    transition: all .3s ease;
+    z-index: 1000; max-width: 300px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── MOBILE ── */
+  .menu-toggle {
+    display: none; position: fixed; top: 14px; left: 14px; z-index: 200;
+    background: var(--lavender-deep); color: white; border: none;
+    width: 40px; height: 40px; border-radius: 10px;
+    cursor: pointer; font-size: 1.2rem;
+  }
+  .overlay-bg {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3);
+    z-index: 90;
+  }
+
+  @media(max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 70px 16px 24px; }
+    .menu-toggle { display: grid; place-items: center; }
+    .overlay-bg.show { display: block; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .empr-grid { grid-template-columns: 1fr 1fr; }
+    .welcome-banner { flex-direction: column; gap: 14px; align-items: flex-start; }
+    .welcome-badge { align-self: flex-start; }
+	.overlay-bg.show ~ .menu-toggle,
+  .overlay-bg.show + .menu-toggle {
+    display: none !important;
+  }
+  }
+  @media(max-width: 560px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .empr-grid { grid-template-columns: 1fr; }
+    .cursos-grid { grid-template-columns: 1fr 1fr; }
+    .retos-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay-bg" id="overlayBg"></div>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <h1>Fin<span>ella</span></h1>
+    <p>Tu plataforma financiera</p>
+  </div>
+  <nav>
+    <button class="nav-item active" data-page="dashboard"><span class="nav-icon">🏡</span> Inicio</button>
+    <button class="nav-item" data-page="gastos"><span class="nav-icon">📋</span> Mis Gastos</button>
+    <button class="nav-item" data-page="asesoria"><span class="nav-icon">✨</span> Pregúntale a MIA</button>
+    <button class="nav-item" data-page="retos"><span class="nav-icon">🎯</span> Retos de Ahorro</button>
+    <button class="nav-item" data-page="cursos"><span class="nav-icon">📚</span> Mini Cursos</button>
+    <button class="nav-item" data-page="emprendimiento"><span class="nav-icon">🚀</span> Emprendimiento</button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="avatar-row">
+      <div class="avatar">👩</div>
+      <div class="avatar-info">
+        <p>Valentina</p>
+        <span>Plan Gratuito</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <section class="page active" id="page-dashboard">
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h3>Bienvenida de vuelta, <em>Valentina</em> 👋</h3>
+        <p>Tus finanzas, tus reglas, tu momento.</p>
+      </div>
+      <div class="welcome-badge">🌟 Meta mensual: 75% alcanzada</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card purple">
+        <div class="stat-label">Ingresos del Mes</div>
+        <div class="stat-value"><sup>Bs.</sup> 8,400</div>
+        <div class="stat-sub">↑ +12% vs mes anterior</div>
+      </div>
+      <div class="stat-card coral">
+        <div class="stat-label">Gastos Registrados</div>
+        <div class="stat-value" id="dash-gastos"><sup>Bs.</sup> 0</div>
+        <div class="stat-sub">Este mes</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Ahorro Acumulado</div>
+        <div class="stat-value"><sup>Bs.</sup> 2,150</div>
+        <div class="stat-sub">↑ +320 esta semana</div>
+      </div>
+    </div>
+
+    <div class="recent-title">Actividad reciente</div>
+    <div class="recent-list" id="dash-recent">
+      <div class="recent-item">
+        <div class="recent-icon" style="background:#fde8e4;">🛒</div>
+        <div class="recent-info"><strong>Supermercado</strong><span>Hoy · Alimentación</span></div>
+        <div class="recent-amt neg">-Bs. 245</div>
+      </div>
+      <div class="recent-item">
+        <div class="recent-icon" style="background:#e8e2f5;">🏠</div>
+        <div class="recent-info"><strong>Alquiler Abril</strong><span>Ayer · Vivienda</span></div>
+        <div class="recent-amt neg">-Bs. 1,800</div>
+      </div>
+      <div class="recent-item">
+        <div class="recent-icon" style="background:#d4f5e5;">💰</div>
+        <div class="recent-info"><strong>Sueldo Abril</strong><span>2 días · Ingreso</span></div>
+        <div class="recent-amt pos">+Bs. 3,700</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GASTOS -->
+  <section class="page" id="page-gastos">
+    <div class="page-header">
+      <h2>Registro de Gastos</h2>
+      <p>Lleva el control de cada boliviano que sale de tu bolsillo.</p>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Nuevo Gasto</h3>
+        <label>Monto (Bs.)</label>
+        <input type="number" id="inp-monto" placeholder="0.00" min="0">
+        <label>Categoría</label>
+        <select id="inp-cat">
+          <option value="">Seleccionar…</option>
+          <option>🛒 Alimentación</option>
+          <option>🏠 Vivienda</option>
+          <option>🚌 Transporte</option>
+          <option>💊 Salud</option>
+          <option>👗 Vestimenta</option>
+          <option>📚 Educación</option>
+          <option>🎉 Entretenimiento</option>
+          <option>💼 Trabajo</option>
+          <option>🌐 Servicios</option>
+          <option>💡 Otros</option>
+        </select>
+        <label>Fecha</label>
+        <input type="date" id="inp-fecha">
+        <label>Descripción (opcional)</label>
+        <input type="text" id="inp-desc" placeholder="Ej: Mercado semanal">
+        <button class="btn btn-primary" id="btn-agregar">✦ Agregar Gasto</button>
+      </div>
+
+      <div class="card">
+        <h3>Últimos Gastos</h3>
+        <div id="expense-list">
+          <div class="empty-state">
+            <div class="empty-icon">🌸</div>
+            <p>Aún no has registrado gastos.<br>¡Empieza ahora!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASESORÍA IA -->
+  <section class="page" id="page-asesoria">
+    <div class="page-header">
+      <h2>Pregúntale a MIA</h2>
+      <p>Conversa con MIA tu asistente financiera personal, disponible 24/7.</p>
+    </div>
+    <div class="chat-wrapper">
+      <div class="chat-header">
+        <div class="ai-avatar">🤖</div>
+        <div class="ai-info">
+          <strong>MIA</strong>
+          <span><span class="chat-online"></span>En línea · Asistente Financiera</span>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg bot">
+          <div class="msg-mini-avatar">🤖</div>
+          <div class="msg-bubble">¡Hola! Soy <strong>MIA</strong> tu asistente financiera personal. Estoy analizando tus hábitos financieros para darte el mejor consejo. ¿En qué te puedo ayudar hoy? 💜</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" type="text" placeholder="Escribe tu pregunta…">
+        <button class="btn-send" id="btn-send">➤</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RETOS -->
+  <section class="page" id="page-retos">
+    <div class="page-header">
+      <h2>Retos de Ahorro</h2>
+      <p>Pequeños compromisos que construyen grandes resultados.</p>
+    </div>
+    <div class="retos-grid">
+      <div class="reto-card">
+        <div class="reto-emoji">📅</div>
+        <h4>Ahorro de 52 Semanas</h4>
+        <p>Ahorra Bs. 1 la primera semana, Bs. 2 la segunda… ¡y acumula Bs. 1,378 al año!</p>
+        <div class="progress-label"><span>Semana 18 de 52</span><span>34%</span></div>
+        <div class="progress-bar"><div class="progress-fill fill-lavender" style="width:34%"></div></div>
+      </div>
+      <div class="reto-card">
+        <div class="reto-emoji">🔟</div>
+        <h4>Reto de los 10 Días</h4>
+        <p>Sin gastos innecesarios por 10 días. Canaliza ese dinero a tu fondo de emergencia.</p>
+        <div class="progress-label"><span>Día 6 de 10</span><span>60%</span></div>
+        <div class="progress-bar"><div class="progress-fill fill-coral" style="width:60%"></div></div>
+      </div>
+      <div class="reto-card">
+        <div class="reto-emoji">☕</div>
+        <h4>Reto del Café</h4>
+        <p>Cambia una semana de café comprado por café en casa. Ahorra hasta Bs. 280.</p>
+        <div class="progress-label"><span>Día 3 de 7</span><span>42%</span></div>
+        <div class="progress-bar"><div class="progress-fill fill-green" style="width:42%"></div></div>
+      </div>
+      <div class="reto-card">
+        <div class="reto-emoji">🐷</div>
+        <h4>Alcancía Digital</h4>
+        <p>Redondea cada gasto y guarda el cambio automáticamente. ¡Lo pequeño suma!</p>
+        <div class="progress-label"><span>Bs. 89 de Bs. 200</span><span>44%</span></div>
+        <div class="progress-bar"><div class="progress-fill fill-lavender" style="width:44%"></div></div>
+      </div>
+      <div class="reto-card">
+        <div class="reto-emoji">🌙</div>
+        <h4>Sin Compras Nocturnas</h4>
+        <p>Nada de compras online después de las 9pm. Reduce las compras impulsivas.</p>
+        <div class="progress-label"><span>12 de 30 días</span><span>40%</span></div>
+        <div class="progress-bar"><div class="progress-fill fill-coral" style="width:40%"></div></div>
+      </div>
+      <div class="reto-card">
+        <div class="reto-emoji">💎</div>
+        <h4>Fondo de Emergencia</h4>
+        <p>Construye un colchón de 3 meses de gastos. Tu red de seguridad financiera.</p>
+        <div class="progress-label"><span>Bs. 1,200 de Bs. 5,000</span><span>24%</span></div>
+        <div class="progress-bar"><div class="progress-fill fill-green" style="width:24%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CURSOS -->
+  <section class="page" id="page-cursos">
+    <div class="page-header">
+      <h2>Mini Cursos de Inversión</h2>
+      <p>Aprende a hacer crecer tu dinero con contenido diseñado para ti.</p>
+    </div>
+    <div class="cursos-grid">
+      <div class="curso-card" data-curso="Tu Primera Inversión">
+        <span class="curso-icon">🌱</span>
+        <h4>Tu Primera Inversión</h4>
+        <span class="curso-badge">Básico</span>
+      </div>
+      <div class="curso-card" data-curso="¿Dónde Invertir tu Dinero?">
+        <span class="curso-icon">📊</span>
+        <h4>¿Dónde Invertir tu Dinero?</h4>
+        <span class="curso-badge">Intermedio</span>
+      </div>
+      <div class="curso-card" data-curso="Cripto Sin Miedo">
+        <span class="curso-icon">₿</span>
+        <h4>Cripto Sin Miedo</h4>
+        <span class="curso-badge">Avanzado</span>
+      </div>
+      <div class="curso-card" data-curso="Tu Dinero Trabajando por Ti: Fondos de Inversión">
+        <span class="curso-icon">🏦</span>
+        <h4>Tu Dinero Trabajando por Ti: Fondos de Inversión</h4>
+        <span class="curso-badge">Básico</span>
+      </div>
+      <div class="curso-card" data-curso="Bienes Raíces desde Cero">
+        <span class="curso-icon">🏠</span>
+        <h4>Bienes Raíces desde Cero</h4>
+        <span class="curso-badge">Intermedio</span>
+      </div>
+      <div class="curso-card" data-curso="Presupuesto Inteligente">
+        <span class="curso-icon">🧠</span>
+        <h4>Presupuesto Inteligente</h4>
+        <span class="curso-badge">Básico</span>
+      </div>
+      <div class="curso-card" data-curso="¿Cómo Llegar Tranquila a tu Jubilación?">
+        <span class="curso-icon">🌅</span>
+        <h4>¿Cómo Llegar Tranquila a tu Jubilación?</h4>
+        <span class="curso-badge">Avanzado</span>
+      </div>
+      <div class="curso-card" data-curso="Respira: Sí Puedes Salir de Deudas">
+        <span class="curso-icon">⛓️</span>
+        <h4>Respira: Sí Puedes Salir de Deudas</h4>
+        <span class="curso-badge">Básico</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- EMPRENDIMIENTO -->
+  <section class="page" id="page-emprendimiento">
+    <div class="page-header">
+      <h2>Herramientas para Emprendimientos</h2>
+      <p>Todo lo que necesitas para llevar tu negocio al siguiente nivel.</p>
+    </div>
+    <div class="coming-soon-wrap">
+      <div class="coming-soon-overlay">
+        <div class="cs-badge">🚀 Próximamente</div>
+      </div>
+      <div class="empr-grid">
+        <div class="empr-card">
+          <div class="empr-icon">📈</div>
+          <h4>Flujo de Caja</h4>
+          <p>Monitorea entradas y salidas de tu negocio en tiempo real.</p>
+        </div>
+        <div class="empr-card">
+          <div class="empr-icon">🧾</div>
+          <h4>Facturación Simple</h4>
+          <p>Genera facturas profesionales en segundos sin complicaciones.</p>
+        </div>
+        <div class="empr-card">
+          <div class="empr-icon">👥</div>
+          <h4>Gestión de Clientes</h4>
+          <p>CRM simple para hacer seguimiento de tus clientes y ventas.</p>
+        </div>
+        <div class="empr-card">
+          <div class="empr-icon">🎯</div>
+          <h4>Metas de Negocio</h4>
+          <p>Define y rastrea los objetivos financieros de tu emprendimiento.</p>
+        </div>
+        <div class="empr-card">
+          <div class="empr-icon">📊</div>
+          <h4>Reportes Financieros</h4>
+          <p>Informes automáticos para tomar mejores decisiones de negocio.</p>
+        </div>
+        <div class="empr-card">
+          <div class="empr-icon">💳</div>
+          <h4>Control de Deudas</h4>
+          <p>Administra los créditos e inversiones de tu empresa con claridad.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  // Navigation
+  const navItems = document.querySelectorAll('.nav-item');
+  const pages = document.querySelectorAll('.page');
+  const sidebar = document.getElementById('sidebar');
+  const menuToggle = document.getElementById('menuToggle');
+  const overlayBg = document.getElementById('overlayBg');
+
+  navItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navItems.forEach(n => n.classList.remove('active'));
+      btn.classList.add('active');
+      pages.forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + btn.dataset.page).classList.add('active');
+      sidebar.classList.remove('open');
+      overlayBg.classList.remove('show');
+    });
+  });
+
+  menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlayBg.classList.toggle('show');
+	
+  });
+  overlayBg.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlayBg.classList.remove('show');
+	
+  });
+
+  // Toast
+  function showToast(msg, duration = 3200) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  // Gastos
+  const expenses = [];
+  const catColors = {
+    'Alimentación': ['#fde8e4','#e07a64'],
+    'Vivienda':     ['#e8e2f5','#8b7bb5'],
+    'Transporte':   ['#d4f0ff','#3a90c0'],
+    'Salud':        ['#d4f5e5','#3a9e6e'],
+    'Vestimenta':   ['#fff0d4','#d4873a'],
+    'Educación':    ['#e4e8ff','#4a5abf'],
+    'Entretenimiento':['#ffe4f4','#bf4a8e'],
+    'Trabajo':      ['#e4f4ff','#3a7abf'],
+    'Servicios':    ['#f4f4e4','#7a7a3a'],
+    'Otros':        ['#f0f0f0','#666'],
+  };
+
+  document.getElementById('inp-fecha').valueAsDate = new Date();
+
+  document.getElementById('btn-agregar').addEventListener('click', () => {
+    const monto = parseFloat(document.getElementById('inp-monto').value);
+    const catRaw = document.getElementById('inp-cat').value;
+    const fecha  = document.getElementById('inp-fecha').value;
+    const desc   = document.getElementById('inp-desc').value.trim();
+
+    if (!monto || monto <= 0) return showToast('⚠️ Ingresa un monto válido.');
+    if (!catRaw) return showToast('⚠️ Selecciona una categoría.');
+    if (!fecha)  return showToast('⚠️ Selecciona una fecha.');
+
+    const parts = catRaw.split(' ');
+    const emojiCat = parts[0];
+    const cat = parts.slice(1).join(' ');
+
+    expenses.unshift({ monto, cat, emojiCat, fecha, desc: desc || cat });
+    renderExpenses();
+    updateDashboard();
+
+    document.getElementById('inp-monto').value = '';
+    document.getElementById('inp-cat').value = '';
+    document.getElementById('inp-desc').value = '';
+    document.getElementById('inp-fecha').valueAsDate = new Date();
+    showToast('✅ Gasto registrado correctamente.');
+  });
+
+  function renderExpenses() {
+    const list = document.getElementById('expense-list');
+    if (!expenses.length) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">🌸</div><p>Aún no has registrado gastos.<br>¡Empieza ahora!</p></div>`;
+      return;
+    }
+    list.innerHTML = `<table class="expense-table">
+      <thead><tr><th>Descripción</th><th>Categoría</th><th>Fecha</th><th>Monto</th></tr></thead>
+      <tbody>${expenses.slice(0,20).map(e => {
+        const c = catColors[e.cat] || ['#f0f0f0','#666'];
+        const d = new Date(e.fecha + 'T00:00:00');
+        const fd = d.toLocaleDateString('es-BO', {day:'numeric',month:'short'});
+        return `<tr>
+          <td><strong>${e.emojiCat} ${e.desc}</strong></td>
+          <td><span class="cat-pill" style="background:${c[0]};color:${c[1]}">${e.cat}</span></td>
+          <td style="color:var(--gray-dark)">${fd}</td>
+          <td class="neg" style="font-weight:600">-Bs. ${e.monto.toFixed(2)}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }
+
+  function updateDashboard() {
+    const total = expenses.reduce((s,e) => s + e.monto, 0);
+    document.getElementById('dash-gastos').innerHTML = `<sup>Bs.</sup> ${total.toFixed(0)}`;
+    if (expenses.length) {
+      document.getElementById('dash-recent').innerHTML = expenses.slice(0,3).map(e => {
+        const c = catColors[e.cat] || ['#f0f0f0','#666'];
+        const d = new Date(e.fecha + 'T00:00:00');
+        const fd = d.toLocaleDateString('es-BO',{day:'numeric',month:'short'});
+        return `<div class="recent-item">
+          <div class="recent-icon" style="background:${c[0]}">${e.emojiCat}</div>
+          <div class="recent-info"><strong>${e.desc}</strong><span>${fd} · ${e.cat}</span></div>
+          <div class="recent-amt neg">-Bs. ${e.monto.toFixed(2)}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Chat
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+
+  const botReplies = [
+    '¡Hola! Soy tu asistente Finella. Estoy analizando tus hábitos para darte el mejor consejo financiero. 💜',
+    'Basándome en tus gastos recientes, te sugiero revisar tu categoría de Entretenimiento. ¿Quieres consejos para reducirlo?',
+    'Recuerda la regla 50/30/20: 50% necesidades, 30% deseos, 20% ahorro. ¿Cómo vas con tu distribución?',
+    'El primer paso es construir un fondo de emergencia de 3 a 6 meses de gastos. ¿Ya tienes el tuyo?',
+    'Los retos de ahorro son perfectos para crear hábitos sostenibles. Te recomiendo empezar con el Reto de 52 Semanas. 🌟',
+    'Para invertir, lo más importante es eliminar primero las deudas de alto interés. ¿Tienes alguna deuda activa?',
+    'Estoy analizando tu patrón de gastos. ¿Te gustaría un plan personalizado para distribuirlos mejor este mes?',
+  ];
+  let replyIdx = 1;
+
+  function appendMsg(text, role) {
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.innerHTML = role === 'bot'
+      ? `<div class="msg-mini-avatar">🤖</div><div class="msg-bubble">${text}</div>`
+      : `<div class="msg-bubble">${text}</div><div class="msg-mini-avatar">👩</div>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function sendMessage() {
+    const txt = chatInput.value.trim();
+    if (!txt) return;
+    appendMsg(txt, 'user');
+    chatInput.value = '';
+    setTimeout(() => {
+      appendMsg(botReplies[replyIdx % botReplies.length], 'bot');
+      replyIdx++;
+    }, 900);
+  }
+
+  document.getElementById('btn-send').addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+  // Cursos
+  document.querySelectorAll('.curso-card').forEach(card => {
+    card.addEventListener('click', () => {
+      showToast(`📚 "${card.dataset.curso}" — Contenido disponible próximamente en la versión completa.`, 4000);
+    });
+  });
+
+  // Animate progress bars
+  setTimeout(() => {
+    document.querySelectorAll('.progress-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0';
+      setTimeout(() => { bar.style.width = w; }, 80);
+    });
+  }, 200);
+})();
+</script>
+</body>
+</html>
