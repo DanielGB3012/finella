@@ -420,6 +420,26 @@
     z-index: 90;
   }
 
+/* ── MODALES ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(45,37,53,0.6); backdrop-filter: blur(4px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: auto; }
+  .modal-content {
+    background: var(--white); border-radius: var(--radius); padding: 32px;
+    width: 90%; max-width: 420px; position: relative;
+    box-shadow: var(--shadow-hover);
+    transform: translateY(20px); transition: transform 0.3s ease;
+  }
+  .modal-overlay.show .modal-content { transform: translateY(0); }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px; background: none; border: none;
+    font-size: 1.8rem; line-height: 1; color: var(--gray-dark); cursor: pointer; transition: color .2s;
+  }
+  .modal-close:hover { color: var(--coral-deep); }
+
   @media(max-width: 900px) {
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
@@ -442,9 +462,38 @@
     .cursos-grid { grid-template-columns: 1fr 1fr; }
     .retos-grid { grid-template-columns: 1fr; }
   }
+  
+/* ── PANTALLA DE BLOQUEO (PIN) ── */
+  .pin-overlay {
+    position: fixed; inset: 0; background: var(--gray-soft);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 3000; transition: opacity 0.4s ease, visibility 0.4s;
+    visibility: visible;
+  }
+  .pin-overlay.hidden {
+    opacity: 0; visibility: hidden;
+  }
+  .pin-card {
+    background: var(--white); border-radius: var(--radius); padding: 40px 32px;
+    width: 90%; max-width: 380px; text-align: center;
+    box-shadow: var(--shadow-hover); border: 1px solid rgba(184,169,217,.15);
+  }
+
 </style>
 </head>
 <body>
+
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-card">
+    <div style="font-size: 3.5rem; margin-bottom: 16px;">🔒</div>
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--ink); margin-bottom: 8px;">Hola de nuevo, Valentina</h2>
+    <p style="color: var(--gray-dark); font-size: 0.9rem; margin-bottom: 24px;">Ingresa tu PIN para acceder a la plataforma.</p>
+    
+    <input type="password" id="pinInput" placeholder="••••" maxlength="4" style="text-align: center; font-size: 1.6rem; letter-spacing: 8px; padding: 12px; margin-bottom: 20px; font-weight: bold;">
+    
+    <button class="btn btn-primary" id="btnUnlock" style="width: 100%; padding: 14px; font-size: 1rem;">Desbloquear</button>
+  </div>
+</div>
 
 <div class="overlay-bg" id="overlayBg"></div>
 <button class="menu-toggle" id="menuToggle">☰</button>
@@ -603,7 +652,7 @@
       <p>Pequeños compromisos que construyen grandes resultados.</p>
     </div>
     <div class="retos-grid">
-      <div class="reto-card">
+      <div class="reto-card" id="reto-52-semanas" style="cursor: pointer;">
         <div class="reto-emoji">📅</div>
         <h4>Ahorro de 52 Semanas</h4>
         <p>Ahorra Bs. 1 la primera semana, Bs. 2 la segunda… ¡y acumula Bs. 1.378 al año!</p>
@@ -655,6 +704,11 @@
       <p>Aprende a hacer crecer tu dinero con contenido diseñado para ti.</p>
     </div>
     <div class="cursos-grid">
+	 <div class="curso-card" data-curso="Bienes Raíces desde Cero">
+        <span class="curso-icon">🏠</span>
+        <h4>Bienes Raíces desde Cero</h4>
+        <span class="curso-badge">Intermedio</span>
+      </div>
       <div class="curso-card" data-curso="Tu Primera Inversión">
         <span class="curso-icon">🌱</span>
         <h4>Tu Primera Inversión</h4>
@@ -675,11 +729,7 @@
         <h4>Tu Dinero Trabajando por Ti: Fondos de Inversión</h4>
         <span class="curso-badge">Básico</span>
       </div>
-      <div class="curso-card" data-curso="Bienes Raíces desde Cero">
-        <span class="curso-icon">🏠</span>
-        <h4>Bienes Raíces desde Cero</h4>
-        <span class="curso-badge">Intermedio</span>
-      </div>
+     
       <div class="curso-card" data-curso="Presupuesto Inteligente">
         <span class="curso-icon">🧠</span>
         <h4>Presupuesto Inteligente</h4>
@@ -698,54 +748,214 @@
     </div>
   </section>
 
+<section class="page" id="page-curso-bienes-raices">
+    
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <button id="btn-back-cursos" style="background:none; border:none; font-size:1.8rem; cursor:pointer; color:var(--ink); padding: 0;">←</button>
+      <h2 style="font-size:1.3rem; font-family:'Playfair Display', serif; margin:0;">Bienes Raíces desde Cero</h2>
+      <button style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--lavender-deep); padding: 0;">🔖</button>
+    </div>
+
+    <div style="text-align:center; margin-bottom:24px;">
+      <span style="background: var(--lavender-light); color: var(--lavender-deep); padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;">INTERMEDIO</span>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #f0e6ff 0%, #d8c6ef 100%); border-radius: var(--radius); padding: 28px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; position: relative; overflow: hidden; box-shadow: var(--shadow);">
+      <div style="max-width: 60%; position: relative; z-index: 2;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--ink); margin-bottom: 12px; line-height: 1.2;">Bienes Raíces<br>desde Cero</h3>
+        <p style="color: var(--gray-dark); font-size: 0.85rem; line-height: 1.5;">Aprende a invertir inteligentemente en bienes raíces y generar ingresos.</p>
+      </div>
+      <div style="position: relative; z-index: 2;">
+        <div style="font-size: 5rem; line-height: 1;">🏡</div>
+        <div style="position: absolute; right: -10px; bottom: 10px; background: var(--lavender-deep); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; transform: rotate(-5deg); box-shadow: 0 4px 10px rgba(0,0,0,0.2);">SE VENDE</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <div style="font-size: 1.4rem; color: var(--lavender-deep);">🗂️</div>
+        <div>
+          <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--ink);">Temas del curso</h4>
+          <p style="font-size: 0.8rem; color: var(--gray-dark);">Explora cada tema y mejora tus conocimientos</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="background: var(--white); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); cursor: pointer;">
+          <div style="width: 48px; height: 48px; background: #e8e2f5; border-radius: 12px; display: grid; place-items: center; font-size: 1.5rem; flex-shrink: 0;">🏠</div>
+          <div style="flex: 1;">
+            <h5 style="font-size: 0.95rem; color: var(--ink); margin-bottom: 4px;">1. Introducción a Bienes Raíces</h5>
+            <p style="font-size: 0.8rem; color: var(--gray-dark); line-height: 1.3;">Conoce cómo funciona el mercado inmobiliario y los conceptos básicos.</p>
+          </div>
+          <div style="color: var(--success); font-size: 1.2rem; background: #d4f5e5; border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center;">✓</div>
+          <div style="color: var(--lavender-deep); font-size: 1.4rem;">›</div>
+        </div>
+        <div style="background: var(--white); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); cursor: pointer;">
+          <div style="width: 48px; height: 48px; background: #d4f0ff; border-radius: 12px; display: grid; place-items: center; font-size: 1.5rem; flex-shrink: 0;">🧮</div>
+          <div style="flex: 1;">
+            <h5 style="font-size: 0.95rem; color: var(--ink); margin-bottom: 4px;">2. Finanzas para Invertir</h5>
+            <p style="font-size: 0.8rem; color: var(--gray-dark); line-height: 1.3;">Aprende sobre créditos, presupuesto y planificación financiera.</p>
+          </div>
+          <div style="color: var(--success); font-size: 1.2rem; background: #d4f5e5; border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center;">✓</div>
+          <div style="color: var(--lavender-deep); font-size: 1.4rem;">›</div>
+        </div>
+        <div style="background: var(--white); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); border: 1.5px solid #ffb74d; cursor: pointer;">
+          <div style="width: 48px; height: 48px; background: #fff0d4; border-radius: 12px; display: grid; place-items: center; font-size: 1.5rem; flex-shrink: 0;">🔑</div>
+          <div style="flex: 1;">
+            <h5 style="font-size: 0.95rem; color: var(--ink); margin-bottom: 4px;">3. Cómo Generar Ingresos</h5>
+            <p style="font-size: 0.8rem; color: var(--gray-dark); line-height: 1.3;">Descubre estrategias para ganar dinero con propiedades.</p>
+          </div>
+          <div style="color: #ffb74d; font-size: 1.2rem;">◉</div>
+          <div style="color: var(--lavender-deep); font-size: 1.4rem;">›</div>
+        </div>
+        <div style="background: var(--white); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); opacity: 0.6; cursor: not-allowed;">
+          <div style="width: 48px; height: 48px; background: #f0f0f0; border-radius: 12px; display: grid; place-items: center; font-size: 1.5rem; flex-shrink: 0;">🔒</div>
+          <div style="flex: 1;">
+            <h5 style="font-size: 0.95rem; color: var(--ink); margin-bottom: 4px;">4. Riesgos y Errores Comunes</h5>
+            <p style="font-size: 0.8rem; color: var(--gray-dark); line-height: 1.3;">Evita los errores más frecuentes y protege tu inversión.</p>
+          </div>
+          <div style="color: var(--gray-mid); font-size: 1.2rem;">🔒</div>
+          <div style="color: var(--lavender-deep); font-size: 1.4rem;">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <div style="font-size: 1.2rem; color: var(--lavender-deep);">📁</div>
+        <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--ink);">Recursos adicionales</h4>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+        <div style="background: var(--white); border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow); cursor: pointer;">
+          <div style="font-size: 1.6rem; margin-bottom: 8px;">▶️</div>
+          <div style="font-size: 0.7rem; font-weight: 600; color: var(--ink); line-height: 1.2;">Videos<br>cortos</div>
+        </div>
+        <div style="background: var(--white); border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow); cursor: pointer;">
+          <div style="font-size: 1.6rem; margin-bottom: 8px;">💡</div>
+          <div style="font-size: 0.7rem; font-weight: 600; color: var(--ink); line-height: 1.2;">Tips<br>financieros</div>
+        </div>
+        <div style="background: var(--white); border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow); cursor: pointer;">
+          <div style="font-size: 1.6rem; margin-bottom: 8px;">📊</div>
+          <div style="font-size: 0.7rem; font-weight: 600; color: var(--ink); line-height: 1.2;">Casos<br>prácticos</div>
+        </div>
+        <div style="background: var(--white); border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow); cursor: pointer;">
+          <div style="font-size: 1.6rem; margin-bottom: 8px;">📋</div>
+          <div style="font-size: 0.7rem; font-weight: 600; color: var(--ink); line-height: 1.2;">Mini<br>ejercicios</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: var(--white); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); border: 1px solid var(--lavender-light); margin-bottom: 24px;">
+      <div style="width: 48px; height: 48px; background: #b84a8e; border-radius: 50%; display: grid; place-items: center; font-size: 1.5rem; color: white; flex-shrink: 0;">🌸</div>
+      <div style="flex: 1;">
+        <h5 style="font-size: 0.9rem; color: var(--ink); margin-bottom: 4px; font-weight: 700;">Únete a Red Mujer Banco Economico</h5>
+        <p style="font-size: 0.75rem; color: var(--gray-dark); line-height: 1.3;">Conecta, aprende y crece junto a otras mujeres que están construyendo su futuro financiero.</p>
+      </div>
+      <button style="background: var(--white); border: 1.5px solid var(--lavender-deep); color: var(--lavender-deep); padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">👥 Unirme</button>
+    </div>
+
+    <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.05rem; border-radius: 12px;">🚀 Continuar Aprendiendo</button>
+
+  </section>
+
   <!-- EMPRENDIMIENTO -->
   <section class="page" id="page-emprendimiento">
     <div class="page-header">
-      <h2>Herramientas para Emprendimientos</h2>
-      <p>Todo lo que necesitas para llevar tu negocio al siguiente nivel.</p>
+      <h2>Mejora a Plan Pro</h2>
+      <p>Desbloquea las herramientas avanzadas para tu emprendimiento y lleva tu negocio al siguiente nivel.</p>
     </div>
-    <div class="coming-soon-wrap">
-      <div class="coming-soon-overlay">
-        <div class="cs-badge">🚀 Próximamente</div>
-      </div>
-      <div class="empr-grid">
-        <div class="empr-card">
-          <div class="empr-icon">📈</div>
-          <h4>Flujo de Caja</h4>
-          <p>Monitorea entradas y salidas de tu negocio en tiempo real.</p>
+    
+    <div class="two-col" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: stretch;">
+      
+      <div class="card" style="background: linear-gradient(135deg, var(--lavender-deep) 0%, #6e5fa0 100%); color: white; border: none; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <h3 style="color: white; margin-bottom: 8px; font-size: 1.4rem;">Plan Pro 🚀</h3>
+          <div style="font-family: 'Playfair Display', serif; font-size: 3.5rem; line-height: 1; margin-bottom: 24px;">29<sup style="font-size: 1.2rem; vertical-align: super;">Bs</sup><span style="font-size: 1rem; font-family: 'DM Sans', sans-serif; opacity: 0.8; font-weight: 400;"> /mes</span></div>
+          
+          <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.95rem; margin-bottom: 30px;">
+            <div style="display: flex; gap: 10px;"><span>✅</span> <span><strong>Flujo de Caja</strong> en tiempo real</span></div>
+            <div style="display: flex; gap: 10px;"><span>✅</span> <span><strong>Facturación Simple</strong> ilimitada</span></div>
+            <div style="display: flex; gap: 10px;"><span>✅</span> <span><strong>Gestión de Clientes</strong> (CRM)</span></div>
+            <div style="display: flex; gap: 10px;"><span>✅</span> <span><strong>Reportes Financieros</strong> automáticos</span></div>
+            <div style="display: flex; gap: 10px;"><span>✅</span> <span><strong>Control de Deudas</strong> avanzado</span></div>
+          </div>
         </div>
-        <div class="empr-card">
-          <div class="empr-icon">🧾</div>
-          <h4>Facturación Simple</h4>
-          <p>Genera facturas profesionales en segundos sin complicaciones.</p>
-        </div>
-        <div class="empr-card">
-          <div class="empr-icon">👥</div>
-          <h4>Gestión de Clientes</h4>
-          <p>CRM simple para hacer seguimiento de tus clientes y ventas.</p>
-        </div>
-        <div class="empr-card">
-          <div class="empr-icon">🎯</div>
-          <h4>Metas de Negocio</h4>
-          <p>Define y rastrea los objetivos financieros de tu emprendimiento.</p>
-        </div>
-        <div class="empr-card">
-          <div class="empr-icon">📊</div>
-          <h4>Reportes Financieros</h4>
-          <p>Informes automáticos para tomar mejores decisiones de negocio.</p>
-        </div>
-        <div class="empr-card">
-          <div class="empr-icon">💳</div>
-          <h4>Control de Deudas</h4>
-          <p>Administra los créditos e inversiones de tu empresa con claridad.</p>
+        
+        <div style="font-size: 0.8rem; opacity: 0.7; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 16px;">
+          * Cancelación en cualquier momento. Pago 100% seguro.
         </div>
       </div>
+
+      <div class="card">
+        <h3 style="margin-bottom: 20px;">Detalles de Pago</h3>
+        
+        <label>Nombre en la tarjeta</label>
+        <input type="text" id="pay-nombre" placeholder="Ej: Valentina Pérez">
+        
+        <label>Número de tarjeta</label>
+        <input type="text" id="pay-tarjeta" placeholder="0000 0000 0000 0000" maxlength="19">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <label>Vencimiento</label>
+            <input type="text" id="pay-fecha" placeholder="MM/AA" maxlength="5">
+          </div>
+          <div>
+            <label>CVV</label>
+            <input type="password" id="pay-cvv" placeholder="123" maxlength="4">
+          </div>
+        </div>
+        
+        <button class="btn btn-primary" id="btn-pagar-pro" style="margin-top: 12px; width: 100%; padding: 14px; font-size: 1rem;">🔒 Procesar pago de 29 Bs</button>
+      </div>
+      
     </div>
   </section>
 
 </main>
 
 <div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modal-reto-52">
+  <div class="modal-content">
+    <button class="modal-close" id="close-modal-52">×</button>
+    
+    <div id="modal-body-52">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 20px; color: var(--ink);">Ahorro de 52 Semanas</h3>
+        
+        <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px; gap: 14px;">
+            <div class="stat-card purple" style="padding: 16px;">
+                <div class="stat-label">Total Ahorrado</div>
+                <div class="stat-value" style="font-size: 1.4rem;"><sup>Bs.</sup> 171</div>
+            </div>
+            <div class="stat-card green" style="padding: 16px;">
+                <div class="stat-label">Meta Final</div>
+                <div class="stat-value" style="font-size: 1.4rem;"><sup>Bs.</sup> 1.378</div>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <div class="progress-label"><span>Progreso</span><span>34%</span></div>
+            <div class="progress-bar"><div class="progress-fill fill-lavender" style="width:34%"></div></div>
+        </div>
+        
+        <div style="background: var(--lavender-light); padding: 16px; border-radius: 12px; margin-bottom: 24px; color: var(--ink); text-align: center;">
+            <em>“¡Vas muy bien! Ya superaste el primer tercio del reto.”</em><br><br>
+            <strong>Esta semana te toca 19Bs</strong>
+        </div>
+        
+        <button class="btn btn-primary" id="btn-completar-semana">✅ Marcar como completada</button>
+    </div>
+
+    <div id="modal-success-52" style="display: none; text-align: center; padding: 20px 0;">
+        <div style="font-size: 4rem; margin-bottom: 16px;">🎉</div>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--success); margin-bottom: 8px;">¡Excelente!</h3>
+        <p style="color: var(--gray-dark); margin-bottom: 24px;">Has completado la semana 18.</p>
+        <button class="btn btn-primary" id="btn-cerrar-success">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function() {
@@ -909,9 +1119,25 @@
   // Cursos
   document.querySelectorAll('.curso-card').forEach(card => {
     card.addEventListener('click', () => {
-      showToast(`📚 "${card.dataset.curso}" — Contenido disponible próximamente en la versión completa.`, 4000);
+      // Si el curso es Bienes Raíces, abrimos la nueva página
+      if (card.dataset.curso === "Bienes Raíces desde Cero") {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-curso-bienes-raices').classList.add('active');
+      } else {
+        // Para los demás cursos, seguimos mostrando el mensaje
+        showToast(`📚 "${card.dataset.curso}" — Contenido disponible próximamente en la versión completa.`, 4000);
+      }
     });
   });
+
+  // Botón para volver atrás (De Curso a Lista de Cursos)
+  const btnBackCursos = document.getElementById('btn-back-cursos');
+  if(btnBackCursos) {
+    btnBackCursos.addEventListener('click', () => {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-cursos').classList.add('active');
+    });
+  }
 
   // Animate progress bars
   setTimeout(() => {
@@ -921,6 +1147,106 @@
       setTimeout(() => { bar.style.width = w; }, 80);
     });
   }, 200);
+  
+  // --- Lógica del Reto 52 Semanas ---
+  const cardReto52 = document.getElementById('reto-52-semanas');
+  const modalReto52 = document.getElementById('modal-reto-52');
+  const closeModalBtn = document.getElementById('close-modal-52');
+  const btnCompletar = document.getElementById('btn-completar-semana');
+  const modalBody = document.getElementById('modal-body-52');
+  const modalSuccess = document.getElementById('modal-success-52');
+  const btnCerrarSuccess = document.getElementById('btn-cerrar-success');
+
+  // Abrir modal al hacer clic en la tarjeta
+  cardReto52.addEventListener('click', () => {
+    modalBody.style.display = 'block'; // Asegura mostrar la info primero
+    modalSuccess.style.display = 'none'; // Oculta el mensaje de éxito
+    modalReto52.classList.add('show');
+  });
+
+  // Función para cerrar el modal
+  const closeModal = () => modalReto52.classList.remove('show');
+  
+  closeModalBtn.addEventListener('click', closeModal);
+  btnCerrarSuccess.addEventListener('click', closeModal);
+
+  // Cerrar modal si se hace clic fuera de la caja blanca
+  modalReto52.addEventListener('click', (e) => {
+    if (e.target === modalReto52) closeModal();
+  });
+
+  // Transición al mensaje de éxito al marcar como completado
+  btnCompletar.addEventListener('click', () => {
+    modalBody.style.display = 'none';
+    modalSuccess.style.display = 'block';
+    showToast('¡Semana 18 completada exitosamente!', 3000); // Aprovechamos tu toast nativo
+  });
+
+// --- Lógica de la Pasarela de Pago Simulado ---
+  const btnPagarPro = document.getElementById('btn-pagar-pro');
+  
+  if(btnPagarPro) {
+    btnPagarPro.addEventListener('click', () => {
+      const nombre = document.getElementById('pay-nombre').value.trim();
+      const tarjeta = document.getElementById('pay-tarjeta').value.trim();
+      
+      // Validación básica visual
+      if(!nombre || !tarjeta) {
+        showToast('⚠️ Por favor completa los datos de la tarjeta.');
+        return;
+      }
+
+      // Animación de carga
+      btnPagarPro.innerHTML = '⏳ Procesando pago...';
+      btnPagarPro.style.opacity = '0.8';
+      btnPagarPro.style.pointerEvents = 'none';
+      
+      // Simulamos que el banco responde después de 1.5 segundos
+      setTimeout(() => {
+        showToast('🎉 ¡Pago exitoso! Bienvenida al Plan Pro.', 4000);
+        
+        // Cambiamos el botón a color verde (éxito)
+        btnPagarPro.innerHTML = '✅ Pago Completado';
+        btnPagarPro.style.background = 'var(--success)';
+        
+        // Limpiamos el formulario para que quede pulcro
+        document.getElementById('pay-nombre').value = '';
+        document.getElementById('pay-tarjeta').value = '';
+        document.getElementById('pay-fecha').value = '';
+        document.getElementById('pay-cvv').value = '';
+      }, 1500);
+    });
+  }
+
+// --- Lógica de la Pantalla de Desbloqueo (PIN) ---
+  const pinOverlay = document.getElementById('pinOverlay');
+  const pinInput = document.getElementById('pinInput');
+  const btnUnlock = document.getElementById('btnUnlock');
+
+  if (pinOverlay && pinInput && btnUnlock) {
+    const validarPin = () => {
+      if (pinInput.value === '1234') {
+        pinOverlay.classList.add('hidden'); // Desvanece la pantalla
+        showToast('🔓 Acceso concedido. ¡Bienvenida!', 2500);
+      } else {
+        showToast('⚠️ PIN incorrecto. Inténtalo de nuevo.', 3000);
+        pinInput.value = '';
+        pinInput.focus();
+      }
+    };
+
+    // Validar al hacer clic en el botón
+    btnUnlock.addEventListener('click', validarPin);
+
+    // Validar al presionar la tecla Enter
+    pinInput.addEventListener('keydown', e => { 
+      if (e.key === 'Enter') validarPin(); 
+    });
+
+    // Auto-enfocar el campo del PIN al abrir la página para comodidad del usuario
+    setTimeout(() => pinInput.focus(), 400);
+  }
+
 })();
 </script>
 </body>
